@@ -7,15 +7,15 @@ namespace myDeque
 	///
 	deque::deque(size_t startCapacity)
 	{
-		if (startCapacity < 2) {
-			capacity = 2;
+		if (startCapacity <2) {
+			capacity = startCapacity;
 		}
 		else {
-			capacity = startCapacity;
+			capacity = 2;
 		}
 
 		frontIndex = capacity / 2;
-		backIndex = frontIndex - 1;
+		backIndex = frontIndex-1;
 		container = new double[capacity];
 	}
 
@@ -29,23 +29,36 @@ namespace myDeque
 		delete[] container;
 	}
 
+	///
+	/// Copy *other in the deque container
+	///
+	/// Container memory need to be allocated before call the function
+	///
 	void deque::copy(double const* other)
 	{
-		for (int i = frontIndex; i <= backIndex; ++i) {
-			container[i] = other[i];
-		}
-
+			for (int i = frontIndex; i <= backIndex; ++i) {
+				container[i] = other[i];
+			}
+		
 	}
-
 	void deque::copyDeque(deque const& dq) {
+
+		container = new double[capacity];
 		capacity = dq.capacity;
 		frontIndex = dq.frontIndex;
 		backIndex = dq.backIndex;
-		container = new double[capacity];
-		copy(dq.container);
+		try {
+			copy(dq.container);
+		}
+		catch (const std::exception & e) {
+			delete[] container;
+			return;
+		}
 	}
 
-
+	///
+	/// Copy constructor
+	///
 	deque::deque(deque const& dq) {
 		copyDeque(dq);
 	}
@@ -58,48 +71,79 @@ namespace myDeque
 		return *this;
 	}
 
+	///
+	/// Destruct dynamic allocate memory
+	///
 	deque::~deque() {
 		deleteDeque();
 	}
 
-
+	///
+	/// Returns number of element in deque
+	///
 	size_t deque::size() const
 	{
 		return backIndex - frontIndex + 1;
 	}
 
-
+	///
+	/// Check if an Deque is empty or not. 
+	///
+	/// Return Value: The function returns True if the deque is empty 
+	/// else it returns False.
+	///
 	bool deque::empty() const
 	{
 		return size() == 0;
 	}
 
-
-	double& deque::operator[](size_t index)
+	///
+	/// Returns a reference to the element at given position in the deque container.
+	///
+	/// \throws if the requested position is out of range by throw an out_of_range exception.
+	///
+	double& deque::operator[](size_t position)
 	{
-		if (index >= size() || index < 0) {
-			std::cout << "Index out of bound";
-			exit(0); //TODO error handling must be consistent
+		if (position >= size() || position < 0) {
+			throw std::out_of_range("given position is out of range");
 		}
-		return container[frontIndex + index];
+		return container[frontIndex + position];
 	}
-
+	///
+	/// Resize container capacity
+	///
+	/// \throws std::bad_alloc If memory allocation fails
+	///
 	void deque::resize() {
-		double* oldDeque = container;
-		container = new double[capacity];
+		double* Buffer = new double[capacity*resize_coefficient];
 
 		capacity *= resize_coefficient;
 		int newFrontIndex = capacity / 2 - size() / 2;
 		int newBackIndex = newFrontIndex;
-		for (int i = frontIndex; i <= backIndex; ++i) {
-			container[newBackIndex] = oldDeque[i];
-			++newBackIndex;
+
+		try {
+			for (int i = frontIndex; i <= backIndex; ++i) {
+				Buffer[newBackIndex] = container[i];
+				++newBackIndex;
+			}
+		}
+		catch(const std::exception & e){
+			delete[] Buffer;
+			return;
 		}
 		frontIndex = newFrontIndex;
 		backIndex = newBackIndex - 1;
-		delete[] oldDeque;
+		delete[] container;
+		container = Buffer;
 	}
-
+	///
+	/// Adds an element to the back of the queue
+	///
+	/// If there is no space left in the underlying buffer
+	/// the function reallocates it.
+	///
+	/// \throws std::bad_alloc If memory allocation fails
+	///
 	void deque::push_back(double data) {
 		if (backIndex == capacity - 1) {
 			resize();
@@ -122,22 +166,32 @@ namespace myDeque
 		container[--frontIndex] = data;
 	}
 
+	///
+	/// Remove and  return item at the front of the deque
+	///
+	/// The operation only work on non-empty deques
+	///
+	/// \throws std::exception if the deque empty
+	///
 	double deque::pop_front() {
-		if (empty()) {
-			std::cout << "Pop from empty deque" << std::endl;
-			return double();
-		}
+		
+		if (empty())
+			throw std::exception();
+
 		return container[frontIndex++];
 	}
 
+	///
+	/// Remove and  return item at the back of the deque
+	///
+	/// The operation only work on non-empty deques
+	///
+	/// \throws std::exception if the deque empty
+	///
 	double deque::pop_back() {
 
-		//TODO consider what happens if the queue is empty
-
-		if (empty()) {
-			std::clog << "Pop from empty deque" << std::endl;
-			return double();
-		}
+		if (empty())
+			throw std::exception();
 
 		return container[backIndex--];
 	}
@@ -146,20 +200,19 @@ namespace myDeque
 	/// Returns the item at the front of the deque
 	///
 	/// The operation only works on non-empty deques
-	/// Behavior on empty deques is undefined
+	///
+	/// \throws std::exception if the deque is empty
 	///
 	double deque::front() {
-		//if (empty()) {
-		//	std::cout << "Empty deque" << std::endl;
-		//	return double();
-		//}
-		assert(!empty());
+
+		if (empty())
+			throw std::exception();
+
 		return container[frontIndex];
 	}
 
-
 	///
-	/// Returns the item at the front of the deque
+	/// Returns the item at the back of the deque
 	///
 	/// The operation only works on non-empty deques
 	/// 

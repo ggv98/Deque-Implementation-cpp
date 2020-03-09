@@ -19,7 +19,7 @@ namespace myDeque
 		void deleteDeque();
 		void resize();
 	public:
-		deque(size_t startCapacity = 16);
+		deque(size_t startCapacity = 0);
 		deque(deque const&);
 		deque& operator = (deque const&);
 		~deque();
