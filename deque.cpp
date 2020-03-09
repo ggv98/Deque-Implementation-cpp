@@ -5,18 +5,13 @@ namespace myDeque
 	///
 	/// Constructs and allocates memory for a deque
 	///
-	deque::deque(size_t startCapacity)
-	{
-		if (startCapacity <2) {
-			capacity = startCapacity;
-		}
-		else {
-			capacity = 2;
-		}
+	deque::deque(size_t _startCapacity){
+		if (_startCapacity > 0) {
 
-		frontIndex = capacity / 2;
-		backIndex = frontIndex-1;
-		container = new double[capacity];
+				startCapacity = _startCapacity;
+			
+		}
+		
 	}
 
 
@@ -83,6 +78,8 @@ namespace myDeque
 	///
 	size_t deque::size() const
 	{
+		if (empty()) return 0;
+
 		return backIndex - frontIndex + 1;
 	}
 
@@ -94,7 +91,7 @@ namespace myDeque
 	///
 	bool deque::empty() const
 	{
-		return size() == 0;
+		return container == nullptr;
 	}
 
 	///
@@ -115,9 +112,9 @@ namespace myDeque
 	/// \throws std::bad_alloc If memory allocation fails
 	///
 	void deque::resize() {
-		double* Buffer = new double[capacity*resize_coefficient];
+		double* Buffer = new double[capacity*resizeCoefficient];
 
-		capacity *= resize_coefficient;
+		capacity *= resizeCoefficient;
 		int newFrontIndex = capacity / 2 - size() / 2;
 		int newBackIndex = newFrontIndex;
 
@@ -136,6 +133,13 @@ namespace myDeque
 		delete[] container;
 		container = Buffer;
 	}
+	void deque::allocContainer()
+	{
+		container = new double[startCapacity];
+		capacity = startCapacity;
+		frontIndex = capacity / 2;
+		backIndex = frontIndex;
+	}
 	///
 	/// Adds an element to the back of the queue
 	///
@@ -145,10 +149,16 @@ namespace myDeque
 	/// \throws std::bad_alloc If memory allocation fails
 	///
 	void deque::push_back(double data) {
-		if (backIndex == capacity - 1) {
-			resize();
+		if (empty()) {
+			allocContainer();
+			container[backIndex] = data;
 		}
-		container[++backIndex] = data;
+		else {
+			if (backIndex == capacity - 1) {
+				resize();
+			}
+			container[++backIndex] = data;
+		}
 	}
 
 	///
@@ -160,10 +170,16 @@ namespace myDeque
 	/// \throws std::bad_alloc If memory allocation fails
 	///
 	void deque::push_front(double data) {
-		if (frontIndex == 0) {
-			resize();
+		if (empty()) {
+			allocContainer();
+			container[frontIndex] = data;
 		}
-		container[--frontIndex] = data;
+		else {
+			if (frontIndex == 0) {
+				resize();
+			}
+			container[--frontIndex] = data;
+		}
 	}
 
 	///
@@ -177,6 +193,16 @@ namespace myDeque
 		
 		if (empty())
 			throw std::exception();
+
+		if (size() == 1) {
+			double tmp = container[frontIndex];
+			delete[] container;
+			container = nullptr;
+			capacity = 0;
+			frontIndex = 0;
+			backIndex = 0;
+			return tmp;
+		}
 
 		return container[frontIndex++];
 	}
@@ -192,6 +218,15 @@ namespace myDeque
 
 		if (empty())
 			throw std::exception();
+		if (size() == 1) {
+			double tmp = container[backIndex];
+			delete[] container;
+			container = nullptr;
+			capacity = 0;
+			frontIndex = 0;
+			backIndex = 0;
+			return tmp;
+		}
 
 		return container[backIndex--];
 	}

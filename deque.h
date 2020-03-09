@@ -5,19 +5,20 @@ namespace myDeque
 	class deque {
 	private:
 
-		double* container; /// Raw pointer to the underlying buffer
+		double* container = nullptr; /// Raw pointer to the underlying buffer
 		                   /// May be NULL if the deque is empty
 		
-		size_t frontIndex; /// Index of the front in the array
-		size_t backIndex;  /// Index of the back in the array
-		size_t capacity;   /// Number of elements in the underlying buffer
+		size_t frontIndex = 0; /// Index of the front in the array
+		size_t backIndex = 0;  /// Index of the back in the array
+		size_t capacity = 0;   /// Number of elements in the underlying buffer
+		size_t startCapacity = 2; /// Size of allocate memory for container
 
-		const int resize_coefficient = 2;
-
+		const double resizeCoefficient = 2;
 		void copy(double const*);
 		void copyDeque(deque const&);
 		void deleteDeque();
 		void resize();
+		void allocContainer();
 	public:
 		deque(size_t startCapacity = 0);
 		deque(deque const&);
