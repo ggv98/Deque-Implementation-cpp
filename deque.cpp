@@ -3,7 +3,7 @@
 namespace myDeque
 {
 	///
-	/// Constructs and allocates memory for a deque
+	/// Construct an empty deque
 	///
 	deque::deque(size_t _startCapacity){
 		if (_startCapacity > 0) {
@@ -13,7 +13,6 @@ namespace myDeque
 		}
 		
 	}
-
 
 	///
 	/// Destroys the deque
@@ -36,6 +35,12 @@ namespace myDeque
 			}
 		
 	}
+
+	///
+	/// Clone deque: dq 
+	///
+	/// \throws std::bad_alloc If memory allocation fails
+	///
 	void deque::copyDeque(deque const& dq) {
 
 		container = new double[capacity];
@@ -58,6 +63,9 @@ namespace myDeque
 		copyDeque(dq);
 	}
 
+	///
+	/// Operator = 
+	///
 	deque& deque::operator=(deque const& dq) {
 		if (this != &dq) {
 			deleteDeque();
@@ -112,9 +120,10 @@ namespace myDeque
 	/// \throws std::bad_alloc If memory allocation fails
 	///
 	void deque::resize() {
-		double* Buffer = new double[capacity*resizeCoefficient];
 
+		double* Buffer = new double[capacity*resizeCoefficient];
 		capacity *= resizeCoefficient;
+
 		int newFrontIndex = capacity / 2 - size() / 2;
 		int newBackIndex = newFrontIndex;
 
@@ -128,11 +137,17 @@ namespace myDeque
 			delete[] Buffer;
 			return;
 		}
+
 		frontIndex = newFrontIndex;
 		backIndex = newBackIndex - 1;
 		delete[] container;
 		container = Buffer;
 	}
+	///
+	/// Allocates memory for a deque and set deque variables
+	///
+	/// \throws std::bad_alloc If memory allocation fails
+	///
 	void deque::allocContainer()
 	{
 		container = new double[startCapacity];
@@ -140,6 +155,7 @@ namespace myDeque
 		frontIndex = capacity / 2;
 		backIndex = frontIndex;
 	}
+
 	///
 	/// Adds an element to the back of the queue
 	///
@@ -154,7 +170,7 @@ namespace myDeque
 			container[backIndex] = data;
 		}
 		else {
-			if (backIndex == capacity - 1) {
+			while (backIndex == capacity - 1) {
 				resize();
 			}
 			container[++backIndex] = data;
@@ -175,7 +191,7 @@ namespace myDeque
 			container[frontIndex] = data;
 		}
 		else {
-			if (frontIndex == 0) {
+			while (frontIndex == 0) {
 				resize();
 			}
 			container[--frontIndex] = data;
@@ -196,11 +212,7 @@ namespace myDeque
 
 		if (size() == 1) {
 			double tmp = container[frontIndex];
-			delete[] container;
-			container = nullptr;
-			capacity = 0;
-			frontIndex = 0;
-			backIndex = 0;
+			clear();
 			return tmp;
 		}
 
@@ -220,11 +232,7 @@ namespace myDeque
 			throw std::exception();
 		if (size() == 1) {
 			double tmp = container[backIndex];
-			delete[] container;
-			container = nullptr;
-			capacity = 0;
-			frontIndex = 0;
-			backIndex = 0;
+			clear();
 			return tmp;
 		}
 
@@ -238,12 +246,38 @@ namespace myDeque
 	///
 	/// \throws std::exception if the deque is empty
 	///
-	double deque::front() {
+	double deque::front() const {
 
 		if (empty())
 			throw std::exception();
 
 		return container[frontIndex];
+	}
+
+	///
+	/// Delete deque and return it in empty state
+	///
+	/// Result : All the elements of the deque are removed ( or destroyed )
+	///
+	void deque::clear()
+	{
+		delete[] container;
+		container = nullptr;
+		capacity = 0;
+		frontIndex = 0;
+		backIndex = 0;
+	}
+
+	void deque::print()
+	{
+		std::cout <<"container:"<< std::endl;
+		for (int i = 0; i < capacity; i++) {
+			std::cout << i << ": "<< container[i] << std::endl;
+		}
+		std::cout << std::endl;
+		std::cout << "frontIndex: " << frontIndex
+			<< "backIndex: " << backIndex
+			<< "capacity" << capacity << std::endl;
 	}
 
 	///
@@ -253,7 +287,7 @@ namespace myDeque
 	/// 
 	/// \throws std::exception if the deque is empty
 	///
-	double deque::back() {
+	double deque::back() const{
 
 		if (empty())
 			throw std::exception();

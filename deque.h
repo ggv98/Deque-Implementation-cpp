@@ -32,8 +32,10 @@ namespace myDeque
 		void push_back(double);
 		double pop_front();
 		double pop_back();
-		double back();
-		double front();
+		double back() const;
+		double front() const;
+		void clear();
+		void print();
 
 	};
 }
