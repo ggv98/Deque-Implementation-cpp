@@ -6,12 +6,10 @@ namespace myDeque
 	/// Construct an empty deque
 	///
 	deque::deque(size_t _startCapacity){
-		if (_startCapacity > 0) {
-
-				startCapacity = _startCapacity;
-			
-		}
 		
+		if (_startCapacity > 0) {
+			startCapacity = _startCapacity;
+		}
 	}
 
 	///
@@ -30,18 +28,21 @@ namespace myDeque
 	///
 	void deque::copy(double const* other)
 	{
-			for (int i = frontIndex; i <= backIndex; ++i) {
-				container[i] = other[i];
-			}
-		
+		for (int i = frontIndex; i <= backIndex; ++i) {
+			container[i] = other[i];
+		}
 	}
 
 	///
 	/// Clone deque: dq 
 	///
+	/// The function should not be called if there
+	/// is allocated memory for the underlying buffer!
+	///
 	/// \throws std::bad_alloc If memory allocation fails
 	///
 	void deque::copyDeque(deque const& dq) {
+		assert(!container);
 
 		container = new double[capacity];
 		capacity = dq.capacity;
@@ -124,8 +125,10 @@ namespace myDeque
 		double* Buffer = new double[capacity*resizeCoefficient];
 		capacity *= resizeCoefficient;
 
-		int newFrontIndex = capacity / 2 - size() / 2;
-		int newBackIndex = newFrontIndex;
+		assert(capacity >= size());
+
+		size_t newFrontIndex = capacity / 2 - size() / 2;
+		size_t newBackIndex = newFrontIndex;
 
 		try {
 			for (int i = frontIndex; i <= backIndex; ++i) {
