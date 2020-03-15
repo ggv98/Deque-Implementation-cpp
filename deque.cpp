@@ -3,6 +3,12 @@
 namespace myDeque
 {
 	///
+	/// Define static memebrs 
+	///
+	std::unordered_set <void*> deque::allocMemory;
+	const std::string deque::logfile = "logfile.log"; 
+
+	///
 	/// Construct an empty deque
 	///
 	deque::deque(size_t _startCapacity){
@@ -18,6 +24,7 @@ namespace myDeque
 	/// The object cannot be used anymore after using this function
 	///
 	void deque::deleteDeque() {
+		if(container)
 		delete[] container;
 	}
 
@@ -115,6 +122,99 @@ namespace myDeque
 		}
 		return container[frontIndex + position];
 	}
+
+	///
+	///Overloaded operator new
+	///
+	/// Record all allocated memory in container allocMemory
+	/// 
+	/// Redirect clog to logfile and print there information for allocated memory
+	/// before finish return clog to default state
+	///
+	void* deque::operator new (size_t count) {
+
+		std::ofstream out(logfile, std::ofstream::app);
+		auto old_clog = std::clog.rdbuf();
+		std::clog.rdbuf(out.rdbuf());
+
+		void* p = malloc(count);
+		
+		std::clog<< "Memory allocate at: " << p <<"size: "<<count<<std::endl;
+		myDeque::deque::allocMemory.insert(p);
+
+		std::clog.rdbuf(old_clog);
+		return p;
+	}
+
+	///
+	///Overloaded operator new[]
+	///
+	/// Record all allocated memory in container allocMemory
+	///
+	/// Redirect clog to logfile and print there information for allocated memory
+	/// before finish return clog to default state
+	///
+	void* deque::operator new[] (size_t count) {
+
+		std::ofstream out(logfile, std::ofstream::app);
+		auto old_clog = std::clog.rdbuf();
+		std::clog.rdbuf(out.rdbuf());
+
+		void* p = malloc(count);
+
+		std::clog << "Array memory allocate at: " << p << "size: " << count << std::endl;
+		myDeque::deque::allocMemory.insert(p);
+
+		std::clog.rdbuf(old_clog);
+		return p;
+	}
+
+	///
+	///Overloaded operator delete[]
+	///
+	/// Erase allocated memory address from container: allocMemory
+	///
+	/// Redirect clog to logfile and print there information for allocated memory
+	/// before finish return clog to default state
+	///
+	void deque::operator delete[] (void* ptr) {
+
+		std::ofstream out(logfile, std::ofstream::app);
+		auto old_clog = std::clog.rdbuf();
+		std::clog.rdbuf(out.rdbuf());
+
+
+		std::clog << "Delete array memory allocate at: " << ptr << std::endl;
+
+		std::clog.rdbuf(old_clog);
+
+		free(ptr);
+		allocMemory.erase(ptr);
+	}
+
+	///
+	///Overloaded operator delete
+	///
+	/// Erase allocated memory address from container: allocMemory
+	///
+	/// Redirect clog to logfile and print there information for allocated memory
+	/// before finish return clog to default state
+	///
+	void deque::operator delete (void* ptr) {
+
+		std::ofstream out(logfile, std::ofstream::app);
+		auto old_clog = std::clog.rdbuf();
+		std::clog.rdbuf(out.rdbuf());
+
+
+		std::clog << "Delete memory allocate at: " << ptr << std::endl;
+
+		std::clog.rdbuf(old_clog);
+
+		free(ptr);
+		allocMemory.erase(ptr);
+	}
+
 	///
 	/// Resize container capacity
 	///
@@ -281,6 +381,19 @@ namespace myDeque
 		std::cout << "frontIndex: " << frontIndex
 			<< "backIndex: " << backIndex
 			<< "capacity" << capacity << std::endl;
+	}
+
+	void deque::checkMemory()
+	{
+		if (allocMemory.empty()) {
+			std::cout << "All allocated memory is free" << std::endl;
+		}
+		else {
+			std::cout << "Memory is not deleted:" << std::endl;
+			for (auto const& i : allocMemory) {
+				std::cout << i << std::endl;
+			}
+		}
 	}
 
 	///
